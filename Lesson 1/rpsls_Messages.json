@@ -1,0 +1,14 @@
+{
+  "chooseHand": "Please choose rock, paper, scissors, lizard, or spock\nChoose: (r, p, ss, l, sp)",
+  "invalidChoice": "Sorry, invalid choice.",
+  "welcomeMessage": "Welcome to Rock, Paper, Scissors, Spock, Lizard!",
+  "exitMessage": "Thanks for playing!",
+  "score": "Score:",
+  "playerWinsRound": "Player wins this round!\n",
+  "computerWinsRound": "Computer wins this round!\n",
+  "tieRound": "It's a tie!\n",
+  "playAgain" : "Play again? (y/n)",
+  "playerWonGame" : "Congratulations! You've won this game!",
+  "computerWonGame" : "The computer has won this game.",
+  "chooseDifficulty" : "\nPlease choose difficulty level:\n   'e'/'easy' | 'h'/'hard'"
+}
