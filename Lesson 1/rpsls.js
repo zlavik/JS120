@@ -9,22 +9,21 @@ const VALID_CHOICES = {
   l: 'lizard'
 };
 
-const displayMessage = (key) => {
+function displayMessage(key) {
   let message = MESSAGES[key];
   console.log(`${message}`);
-};
+}
 
-const createPlayer = () => {
+function createPlayer() {
   return {
     handHistory: [],
     getLastMove() {
       return this.handHistory[this.handHistory.length - 1];
     }
   };
-};
+}
 
-
-let strategy = {
+const difficulty = {
   LOSING_MOVES: {
     rock: ['paper', 'spock'],
     paper: ['scissors', 'lizard'],
@@ -33,24 +32,24 @@ let strategy = {
     lizard: ['scissors', 'rock']
   },
 
-  getNextRandomMove() {
+  getEasyMove() {
     let randomIndex = Math.floor(Math.random() * VALID_MOVES.length);
     let choice = VALID_MOVES[randomIndex];
 
     return choice;
   },
 
-  getStartingStates() {
+  getInitialState() {
     let states = {};
 
     for (let move1 of VALID_MOVES) {
       for (let move2 of VALID_MOVES) {
         let lastTwoMoves = move1 + move2;
         states[lastTwoMoves] = {};
-        states[lastTwoMoves]['totalCount'] = 0;
+        states[lastTwoMoves]['total'] = 0;
 
         for (let nextMove of VALID_MOVES) {
-          states[lastTwoMoves][nextMove] = { count: 0, possibility: 0.2 };
+          states[lastTwoMoves][nextMove] = { count: 0, probability: 0.2 };
         }
       }
     }
@@ -58,57 +57,57 @@ let strategy = {
     return states;
   },
 
-  updateStatesCount(statesObject, opponentMoves) {
+  updateStateCount(statesObject, opponentMoves) {
     for (let index = 2; index < opponentMoves.length; index += 1) {
       let previousMoves = opponentMoves[index - 2]
         + opponentMoves[index - 1];
       let nextMove = opponentMoves[index];
 
-      statesObject[previousMoves]['totalCount'] += 1;
+      statesObject[previousMoves]['total'] += 1;
       statesObject[previousMoves][nextMove]['count'] += 1;
     }
   },
 
-  updateStatesPossibilities(statesObject) {
+  updateStateProbability(statesObject) {
     for (let previousMoves in statesObject) {
-      let totalCount = statesObject[previousMoves]['totalCount'];
+      let total = statesObject[previousMoves]['total'];
 
-      if (totalCount > 0) {
+      if (total > 0) {
         for (let nextMove of VALID_MOVES) {
-          statesObject[previousMoves][nextMove]['possibility'] =
-            statesObject[previousMoves][nextMove]['count'] / totalCount;
+          statesObject[previousMoves][nextMove]['probability'] =
+            statesObject[previousMoves][nextMove]['count'] / total;
         }
       }
     }
   },
 
-  getOpponentNextMove(previousMovesObject) {
+  getNextPossibleMove(previousMovesObject) {
     let possibleNextMoves = VALID_MOVES.slice();
 
     possibleNextMoves.sort((a, b) => {
-      return previousMovesObject[b]['possibility'] -
-        previousMovesObject[a]['possibility'];
+      return previousMovesObject[b]['probability'] -
+        previousMovesObject[a]['probability'];
     });
 
     return possibleNextMoves[0];
   },
 
-  getNexthardMove(opponenthandHistory) {
-    if (opponenthandHistory.length < 3) return this.getNextRandomMove();
+  getHardMove(opponenthandHistory) {
+    if (opponenthandHistory.length < 3) return this.getEasyMove();
 
-    let states = this.getStartingStates();
+    let states = this.getInitialState();
 
     let recentOpponentMoves = opponenthandHistory.slice(-50);
 
-    this.updateStatesCount(states, recentOpponentMoves);
-    this.updateStatesPossibilities(states);
+    this.updateStateCount(states, recentOpponentMoves);
+    this.updateStateProbability(states);
 
     let previousMoves = recentOpponentMoves.slice(-2).join('');
 
-    if (states[previousMoves]['totalCount']
-     === 0) return this.getNextRandomMove();
+    if (states[previousMoves]['total']
+     === 0) return this.getEasyMove();
 
-    let opponentNextMove = this.getOpponentNextMove(states[previousMoves]);
+    let opponentNextMove = this.getNextPossibleMove(states[previousMoves]);
 
     let randomIndex = Math.floor(Math.random() *
       this.LOSING_MOVES[opponentNextMove].length);
@@ -116,7 +115,7 @@ let strategy = {
     return this.LOSING_MOVES[opponentNextMove][randomIndex];
   }
 };
-let validations = {
+const validations = {
   fetchPlayerMove(input) {
     let choice;
     while (true) {
@@ -136,7 +135,7 @@ let validations = {
   },
 };
 
-const createHuman = () => {
+function createHuman() {
   let playerObject = createPlayer();
   let humanObject = {
     choose() {
@@ -145,26 +144,25 @@ const createHuman = () => {
     },
   };
   return Object.assign(playerObject, humanObject);
-};
+}
 
-const createComputer = () => {
+function createComputer() {
   let playerObject = createPlayer();
   let computerObject = {
-    strategy: strategy,
+    difficulty: difficulty,
 
-    choose(strategyType, opponentMoves) {
-      if (strategyType === 'easy') {
-        this.handHistory.push(this.getNextRandomMove());
-      } else if (strategyType === 'hard') {
-        this.handHistory.push(this.getNexthardMove(opponentMoves));
+    choose(difficultyType, opponentMoves) {
+      if (difficultyType === 'easy') {
+        this.handHistory.push(this.getEasyMove());
+      } else if (difficultyType === 'hard') {
+        this.handHistory.push(this.getHardMove(opponentMoves));
       }
     },
   };
 
-  return Object.assign(playerObject, strategy,
+  return Object.assign(playerObject, difficulty,
     computerObject);
-};
-
+}
 
 const RPSSLGame = {
   WINNING_MOVES: {
@@ -301,14 +299,14 @@ const RPSSLGame = {
     console.clear();
   },
 
-  playRound(computerStrategy) {
+  playRound(computerdifficulty) {
     this.displayGameScore();
 
     this.displayRecentMoves();
 
-    if (['h', 'hard'].includes(computerStrategy)) {
+    if (['h', 'hard'].includes(computerdifficulty)) {
       this.computer.choose('hard', this.human.handHistory);
-    } else if (['e', 'easy'].includes(computerStrategy)) {
+    } else if (['e', 'easy'].includes(computerdifficulty)) {
       this.computer.choose('easy');
     }
 
@@ -360,6 +358,5 @@ const RPSSLGame = {
     this.displayExitMessage();
   }
 };
-
 
 RPSSLGame.play();
