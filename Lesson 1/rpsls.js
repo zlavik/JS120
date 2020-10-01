@@ -69,6 +69,7 @@ const validUserInput = {
 function createPlayer() {
   return {
     handHistory: [],
+    score: 0,
     getLastMove() {
       return this.handHistory[this.handHistory.length - 1];
     }
@@ -98,40 +99,35 @@ const difficulty = {
   getInitialState() {
     let states = {};
 
-    for (let move1 of VALID_MOVES) {
-      for (let move2 of VALID_MOVES) {
-        let lastTwoMoves = move1 + move2;
+    for (let firstMove of VALID_MOVES) {
+      for (let secondMove of VALID_MOVES) {
+        let lastTwoMoves = firstMove + secondMove;
         states[lastTwoMoves] = {};
         states[lastTwoMoves]['total'] = 0;
-
         for (let nextMove of VALID_MOVES) {
           states[lastTwoMoves][nextMove] = { count: 0, probability: 0.2 };
         }
       }
     }
-
     return states;
   },
 
-  updateStateCount(stateObj, playerMoves) {
+  updateStateCount(state, playerMoves) {
     for (let index = 2; index < playerMoves.length; index += 1) {
-      let previousMoves = playerMoves[index - 2]
-        + playerMoves[index - 1];
+      let previousMoves = playerMoves[index - 2] + playerMoves[index - 1];
       let nextMove = playerMoves[index];
-
-      stateObj[previousMoves]['total'] += 1;
-      stateObj[previousMoves][nextMove]['count'] += 1;
+      state[previousMoves]['total'] += 1;
+      state[previousMoves][nextMove]['count'] += 1;
     }
   },
 
-  updateStateProbability(stateObj) {
-    for (let previousMoves in stateObj) {
-      let total = stateObj[previousMoves]['total'];
-
+  updateStateProbability(state) {
+    for (let previousMoves in state) {
+      let total = state[previousMoves]['total'];
       if (total > 0) {
         for (let nextMove of VALID_MOVES) {
-          stateObj[previousMoves][nextMove]['probability'] =
-            stateObj[previousMoves][nextMove]['count'] / total;
+          state[previousMoves][nextMove]['probability'] =
+            state[previousMoves][nextMove]['count'] / total;
         }
       }
     }
@@ -142,7 +138,6 @@ const difficulty = {
       return previousMovesObject[b]['probability'] -
         previousMovesObject[a]['probability'];
     });
-
     return possibleNextMoves[0];
   },
 
@@ -155,10 +150,8 @@ const difficulty = {
 
     let states = this.getInitialState();
     let recentOpponentMoves = opponenthandHistory.slice(-50);
-
     this.updateStateCount(states, recentOpponentMoves);
     this.updateStateProbability(states);
-
     let previousMoves = recentOpponentMoves.slice(-2).join('');
 
     if (states[previousMoves]['total']
@@ -200,9 +193,6 @@ const RPSSLGame = {
 
   human: createHuman(),
   computer: createComputer(),
-
-  humanScore: 0,
-  computerScore: 0,
   maxScore: 5,
 
 
@@ -224,7 +214,7 @@ const RPSSLGame = {
 
   displayGameScore() {
     displayMessage('score');
-    console.log(`Player: ${this.humanScore} | Computer: ${this.computerScore}\n`);
+    console.log(`Player: ${this.human.score} | Computer: ${this.computer.score}\n`);
   },
 
   displayRecentMoves() {
@@ -253,9 +243,9 @@ const RPSSLGame = {
 
   updateGameScore(roundWinner) {
     if (roundWinner === 'human') {
-      this.humanScore += 1;
+      this.human.score += 1;
     } else if (roundWinner === 'computer') {
-      this.computerScore += 1;
+      this.computer.score += 1;
     }
   },
 
@@ -287,12 +277,12 @@ const RPSSLGame = {
   },
 
   isGameOver() {
-    return (this.humanScore === this.maxScore ||
-      this.computerScore === this.maxScore);
+    return (this.human.score === this.maxScore ||
+      this.computer.score === this.maxScore);
   },
 
   getGameWinner() {
-    return this.humanScore > this.computerScore ? 'human' : 'computer';
+    return this.human.score > this.computer.score ? 'human' : 'computer';
   },
 
   displayGameResults(winner) {
@@ -306,8 +296,8 @@ const RPSSLGame = {
   },
 
   resetGameScores() {
-    this.computerScore = 0;
-    this.humanScore = 0;
+    this.computer.score = 0;
+    this.human.score = 0;
 
     console.clear();
   },
