@@ -14,6 +14,96 @@ function displayMessage(key) {
   console.log(`${message}`);
 }
 
+const validUserInput = {
+  fetchPlayerMove() {
+    let choice;
+    while (true) {
+      displayMessage('chooseHand');
+      choice = readline.question('=> ').toLowerCase();
+      if (VALID_MOVES.includes(choice) ||
+        Object.keys(VALID_CHOICES).includes(choice)) {
+        break;
+      } else {
+        displayMessage('invalidChoice');
+      }
+    }
+    if (Object.keys(VALID_CHOICES).includes(choice)) {
+      choice = VALID_CHOICES[choice];
+    }
+    return choice;
+  },
+
+  fetchDifficulty() {
+    let answer;
+    while (true) {
+      displayMessage('chooseDifficulty');
+      answer = readline.question('=> ').toLowerCase();
+
+      if (['e', 'h', 'easy', 'hard'].includes(answer)) {
+        console.clear();
+        break;
+      } else {
+        displayMessage('invalidChoice');
+      }
+    }
+    return answer;
+  },
+
+  fetchPlayAgain() {
+    let answer;
+    while (true) {
+      displayMessage('playAgain');
+      answer = readline.question('=> ').toLowerCase();
+
+      if (['y', 'n', 'yes', 'no'].includes(answer)) {
+        break;
+      } else {
+        displayMessage('invalidChoice');
+      }
+    }
+    return answer;
+  },
+
+};
+
+function createPlayer() {
+  return {
+    handHistory: [],
+    getLastMove() {
+      return this.handHistory[this.handHistory.length - 1];
+    }
+  };
+}
+
+function createComputer() {
+  let playerObject = createPlayer();
+  let computerObject = {
+    difficulty: difficulty,
+
+    choose(difficultyType, opponentMoves) {
+      if (difficultyType === 'easy') {
+        this.handHistory.push(this.getEasyMove());
+      } else if (difficultyType === 'hard') {
+        this.handHistory.push(this.getHardMove(opponentMoves));
+      }
+    },
+  };
+
+  return Object.assign(playerObject, difficulty,
+    computerObject);
+}
+
+function createHuman() {
+  let playerObject = createPlayer();
+  let humanObject = {
+    choose() {
+      let choice = validUserInput.fetchPlayerMove();
+      this.handHistory.push(choice);
+    },
+  };
+  return Object.assign(playerObject, humanObject);
+}
+
 const difficulty = {
   LOSING_MOVES: {
     rock: ['paper', 'spock'],
@@ -106,96 +196,6 @@ const difficulty = {
     return this.LOSING_MOVES[opponentNextMove][randomIndex];
   }
 };
-
-const validUserInput = {
-  fetchPlayerMove() {
-    let choice;
-    while (true) {
-      displayMessage('chooseHand');
-      choice = readline.question('=> ').toLowerCase();
-      if (VALID_MOVES.includes(choice) ||
-        Object.keys(VALID_CHOICES).includes(choice)) {
-        break;
-      } else {
-        displayMessage('invalidChoice');
-      }
-    }
-    if (Object.keys(VALID_CHOICES).includes(choice)) {
-      choice = VALID_CHOICES[choice];
-    }
-    return choice;
-  },
-
-  fetchDifficulty() {
-    let answer;
-    while (true) {
-      displayMessage('chooseDifficulty');
-      answer = readline.question('=> ').toLowerCase();
-
-      if (['e', 'h', 'easy', 'hard'].includes(answer)) {
-        console.clear();
-        break;
-      } else {
-        displayMessage('invalidChoice');
-      }
-    }
-    return answer;
-  },
-
-  fetchPlayAgain() {
-    let answer;
-    while (true) {
-      displayMessage('playAgain');
-      answer = readline.question('=> ').toLowerCase();
-
-      if (['y', 'n', 'yes', 'no'].includes(answer)) {
-        break;
-      } else {
-        displayMessage('invalidChoice');
-      }
-    }
-    return answer;
-  },
-
-};
-
-function createPlayer() {
-  return {
-    handHistory: [],
-    getLastMove() {
-      return this.handHistory[this.handHistory.length - 1];
-    }
-  };
-}
-
-function createComputer() {
-  let playerObject = createPlayer();
-  let computerObject = {
-    difficulty: difficulty,
-
-    choose(difficultyType, opponentMoves) {
-      if (difficultyType === 'easy') {
-        this.handHistory.push(this.getEasyMove());
-      } else if (difficultyType === 'hard') {
-        this.handHistory.push(this.getHardMove(opponentMoves));
-      }
-    },
-  };
-
-  return Object.assign(playerObject, difficulty,
-    computerObject);
-}
-
-function createHuman() {
-  let playerObject = createPlayer();
-  let humanObject = {
-    choose() {
-      let choice = validUserInput.fetchPlayerMove();
-      this.handHistory.push(choice);
-    },
-  };
-  return Object.assign(playerObject, humanObject);
-}
 
 const RPSSLGame = {
   WINNING_MOVES: {
