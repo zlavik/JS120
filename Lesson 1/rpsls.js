@@ -14,15 +14,6 @@ function displayMessage(key) {
   console.log(`${message}`);
 }
 
-function createPlayer() {
-  return {
-    handHistory: [],
-    getLastMove() {
-      return this.handHistory[this.handHistory.length - 1];
-    }
-  };
-}
-
 const difficulty = {
   LOSING_MOVES: {
     rock: ['paper', 'spock'],
@@ -30,13 +21,6 @@ const difficulty = {
     scissors: ['rock', 'spock'],
     spock: ['paper', 'lizard'],
     lizard: ['scissors', 'rock']
-  },
-
-  getEasyMove() {
-    let randomIndex = Math.floor(Math.random() * VALID_MOVES.length);
-    let choice = VALID_MOVES[randomIndex];
-
-    return choice;
   },
 
   getInitialState() {
@@ -92,6 +76,13 @@ const difficulty = {
     return possibleNextMoves[0];
   },
 
+  getEasyMove() {
+    let randomIndex = Math.floor(Math.random() * VALID_MOVES.length);
+    let choice = VALID_MOVES[randomIndex];
+
+    return choice;
+  },
+
   getHardMove(opponenthandHistory) {
     if (opponenthandHistory.length < 3) return this.getEasyMove();
 
@@ -115,12 +106,13 @@ const difficulty = {
     return this.LOSING_MOVES[opponentNextMove][randomIndex];
   }
 };
-const validations = {
-  fetchPlayerMove(input) {
+
+const validUserInput = {
+  fetchPlayerMove() {
     let choice;
     while (true) {
-      displayMessage(input);
-      choice = readline.question().toLowerCase();
+      displayMessage('chooseHand');
+      choice = readline.question('=> ').toLowerCase();
       if (VALID_MOVES.includes(choice) ||
         Object.keys(VALID_CHOICES).includes(choice)) {
         break;
@@ -133,17 +125,47 @@ const validations = {
     }
     return choice;
   },
+
+  fetchDifficulty() {
+    let answer;
+    while (true) {
+      displayMessage('chooseDifficulty');
+      answer = readline.question('=> ').toLowerCase();
+
+      if (['e', 'h', 'easy', 'hard'].includes(answer)) {
+        console.clear();
+        break;
+      } else {
+        displayMessage('invalidChoice');
+      }
+    }
+    return answer;
+  },
+
+  fetchPlayAgain() {
+    let answer;
+    while (true) {
+      displayMessage('playAgain');
+      answer = readline.question('=> ').toLowerCase();
+
+      if (['y', 'n', 'yes', 'no'].includes(answer)) {
+        break;
+      } else {
+        displayMessage('invalidChoice');
+      }
+    }
+    return answer;
+  },
+
 };
 
-function createHuman() {
-  let playerObject = createPlayer();
-  let humanObject = {
-    choose() {
-      let choice = validations.fetchPlayerMove('chooseHand');
-      this.handHistory.push(choice);
-    },
+function createPlayer() {
+  return {
+    handHistory: [],
+    getLastMove() {
+      return this.handHistory[this.handHistory.length - 1];
+    }
   };
-  return Object.assign(playerObject, humanObject);
 }
 
 function createComputer() {
@@ -164,6 +186,17 @@ function createComputer() {
     computerObject);
 }
 
+function createHuman() {
+  let playerObject = createPlayer();
+  let humanObject = {
+    choose() {
+      let choice = validUserInput.fetchPlayerMove();
+      this.handHistory.push(choice);
+    },
+  };
+  return Object.assign(playerObject, humanObject);
+}
+
 const RPSSLGame = {
   WINNING_MOVES: {
     scissors: ['paper', 'lizard'],
@@ -182,13 +215,14 @@ const RPSSLGame = {
 
 
   displayWelcomeMessage() {
-    let lineWidth = 80;
+    let lineWidth = 55;
     let message = MESSAGES['welcomeMessage'];
+    let message2 = `This game is best out of ${this.maxScore}.`;
 
     console.log('='.repeat(lineWidth));
     console.log(' '.padStart((lineWidth - message.length) / 2) + message);
     console.log('='.repeat(lineWidth));
-    console.log(`This game is best of ${this.maxScore}.`);
+    console.log(' '.padStart((lineWidth - message2.length) / 2) + message2);
   },
 
   displayExitMessage() {
@@ -202,8 +236,8 @@ const RPSSLGame = {
   },
 
   displayRecentMoves() {
-    let humanRecentMoves = this.human.handHistory.slice(-20);
-    let computerRecentMoves = this.computer.handHistory.slice(-20);
+    let humanRecentMoves = this.human.handHistory.slice(-7);
+    let computerRecentMoves = this.computer.handHistory.slice(-7);
 
     if (humanRecentMoves.length > 0) {
       console.log();
@@ -256,21 +290,8 @@ const RPSSLGame = {
   },
 
   playAnotherGame() {
-    let answer;
     console.log();
-
-    while (true) {
-      displayMessage('playAgain');
-      answer = readline.question().toLowerCase();
-
-      if (['y', 'n', 'yes', 'no'].includes(answer)) {
-        break;
-      } else {
-        displayMessage('invalidChoice');
-      }
-    }
-
-    return answer.toLowerCase()[0] === 'y';
+    return validUserInput.fetchPlayAgain()[0] === 'y';
   },
 
   isGameOver() {
@@ -320,20 +341,7 @@ const RPSSLGame = {
   },
 
   getDifficulty() {
-    let choice;
-
-    while (true) {
-      displayMessage('chooseDifficulty');
-      choice = readline.question().toLowerCase();
-
-      if (['e', 'h', 'easy', 'hard'].includes(choice)) {
-        console.clear();
-        break;
-      } else {
-        displayMessage('invalidChoice');
-      }
-    }
-    return choice;
+    return validUserInput.fetchDifficulty();
   },
 
   play() {
