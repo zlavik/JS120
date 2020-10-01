@@ -1,13 +1,6 @@
 const readline = require('readline-sync');
 const MESSAGES = require('./rpsls_Messages.json');
 const VALID_MOVES = ['rock', 'paper', 'scissors', 'spock', 'lizard'];
-const VALID_CHOICES = {
-  r: 'rock',
-  p: 'paper',
-  ss: 'scissors',
-  sp: 'spock',
-  l: 'lizard'
-};
 
 function displayMessage(key) {
   let message = MESSAGES[key];
@@ -15,20 +8,28 @@ function displayMessage(key) {
 }
 
 const validUserInput = {
+  VALID_CHOICES : {
+    r: 'rock',
+    p: 'paper',
+    ss: 'scissors',
+    sp: 'spock',
+    l: 'lizard'
+  },
+
   fetchPlayerMove() {
     let choice;
     while (true) {
       displayMessage('chooseHand');
       choice = readline.question('=> ').toLowerCase();
       if (VALID_MOVES.includes(choice) ||
-        Object.keys(VALID_CHOICES).includes(choice)) {
+        Object.keys(this.VALID_CHOICES).includes(choice)) {
         break;
       } else {
         displayMessage('invalidChoice');
       }
     }
-    if (Object.keys(VALID_CHOICES).includes(choice)) {
-      choice = VALID_CHOICES[choice];
+    if (Object.keys(this.VALID_CHOICES).includes(choice)) {
+      choice = this.VALID_CHOICES[choice];
     }
     return choice;
   },
