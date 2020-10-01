@@ -75,24 +75,6 @@ function createPlayer() {
   };
 }
 
-function createComputer() {
-  let playerObject = createPlayer();
-  let computerObject = {
-    difficulty: difficulty,
-
-    choose(difficultyType, opponentMoves) {
-      if (difficultyType === 'easy') {
-        this.handHistory.push(this.getEasyMove());
-      } else if (difficultyType === 'hard') {
-        this.handHistory.push(this.getHardMove(opponentMoves));
-      }
-    },
-  };
-
-  return Object.assign(playerObject, difficulty,
-    computerObject);
-}
-
 function createHuman() {
   let playerObject = createPlayer();
   let humanObject = {
@@ -105,7 +87,7 @@ function createHuman() {
 }
 
 const difficulty = {
-  LOSING_MOVES: {
+  LOSING_COMBOS: {
     rock: ['paper', 'spock'],
     paper: ['scissors', 'lizard'],
     scissors: ['rock', 'spock'],
@@ -131,34 +113,32 @@ const difficulty = {
     return states;
   },
 
-  updateStateCount(statesObject, opponentMoves) {
-    for (let index = 2; index < opponentMoves.length; index += 1) {
-      let previousMoves = opponentMoves[index - 2]
-        + opponentMoves[index - 1];
-      let nextMove = opponentMoves[index];
+  updateStateCount(stateObj, playerMoves) {
+    for (let index = 2; index < playerMoves.length; index += 1) {
+      let previousMoves = playerMoves[index - 2]
+        + playerMoves[index - 1];
+      let nextMove = playerMoves[index];
 
-      statesObject[previousMoves]['total'] += 1;
-      statesObject[previousMoves][nextMove]['count'] += 1;
+      stateObj[previousMoves]['total'] += 1;
+      stateObj[previousMoves][nextMove]['count'] += 1;
     }
   },
 
-  updateStateProbability(statesObject) {
-    for (let previousMoves in statesObject) {
-      let total = statesObject[previousMoves]['total'];
+  updateStateProbability(stateObj) {
+    for (let previousMoves in stateObj) {
+      let total = stateObj[previousMoves]['total'];
 
       if (total > 0) {
         for (let nextMove of VALID_MOVES) {
-          statesObject[previousMoves][nextMove]['probability'] =
-            statesObject[previousMoves][nextMove]['count'] / total;
+          stateObj[previousMoves][nextMove]['probability'] =
+            stateObj[previousMoves][nextMove]['count'] / total;
         }
       }
     }
   },
 
   getNextPossibleMove(previousMovesObject) {
-    let possibleNextMoves = VALID_MOVES.slice();
-
-    possibleNextMoves.sort((a, b) => {
+    let possibleNextMoves = VALID_MOVES.slice().sort((a, b) => {
       return previousMovesObject[b]['probability'] -
         previousMovesObject[a]['probability'];
     });
@@ -167,17 +147,13 @@ const difficulty = {
   },
 
   getEasyMove() {
-    let randomIndex = Math.floor(Math.random() * VALID_MOVES.length);
-    let choice = VALID_MOVES[randomIndex];
-
-    return choice;
+    return VALID_MOVES[Math.floor(Math.random() * VALID_MOVES.length)];
   },
 
   getHardMove(opponenthandHistory) {
     if (opponenthandHistory.length < 3) return this.getEasyMove();
 
     let states = this.getInitialState();
-
     let recentOpponentMoves = opponenthandHistory.slice(-50);
 
     this.updateStateCount(states, recentOpponentMoves);
@@ -189,13 +165,29 @@ const difficulty = {
      === 0) return this.getEasyMove();
 
     let opponentNextMove = this.getNextPossibleMove(states[previousMoves]);
-
     let randomIndex = Math.floor(Math.random() *
-      this.LOSING_MOVES[opponentNextMove].length);
+      this.LOSING_COMBOS[opponentNextMove].length);
 
-    return this.LOSING_MOVES[opponentNextMove][randomIndex];
+    return this.LOSING_COMBOS[opponentNextMove][randomIndex];
   }
 };
+
+function createComputer() {
+  let playerObject = createPlayer();
+  let computerObject = {
+    difficulty: difficulty,
+
+    choose(difficultyType, playerMoves) {
+      if (difficultyType === 'easy') {
+        this.handHistory.push(this.getEasyMove());
+      } else if (difficultyType === 'hard') {
+        this.handHistory.push(this.getHardMove(playerMoves));
+      }
+    },
+  };
+
+  return Object.assign(playerObject, difficulty, computerObject);
+}
 
 const RPSSLGame = {
   WINNING_MOVES: {
