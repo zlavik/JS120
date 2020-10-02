@@ -80,7 +80,7 @@ function createPlayer() {
 function createHuman() {
   let playerObject = createPlayer();
   let humanObject = {
-    choose() {
+    chooseMove() {
       let choice = validUserInput.fetchPlayerMove();
       this.handHistory.push(choice);
     },
@@ -155,8 +155,7 @@ const difficulty = {
     this.updateStateProbability(states);
     let previousMoves = recentOpponentMoves.slice(-2).join('');
 
-    if (states[previousMoves]['total']
-     === 0) return this.getEasyMove();
+    if (states[previousMoves]['total'] === 0) return this.getEasyMove();
 
     let opponentNextMove = this.getNextPossibleMove(states[previousMoves]);
     let randomIndex = Math.floor(Math.random() *
@@ -171,10 +170,10 @@ function createComputer() {
   let computerObject = {
     difficulty: difficulty,
 
-    choose(difficultyType, playerMoves) {
-      if (difficultyType === 'easy') {
+    chooseMove(difficultyType, playerMoves) {
+      if (['easy', 'e'].includes(difficultyType)) {
         this.handHistory.push(this.getEasyMove());
-      } else if (difficultyType === 'hard') {
+      } else {
         this.handHistory.push(this.getHardMove(playerMoves));
       }
     },
@@ -198,6 +197,7 @@ const RPSSLGame = {
 
 
   displayWelcomeMessage() {
+    console.clear();
     let lineWidth = 55;
     let message = MESSAGES['welcomeMessage'];
     let message2 = `This game is best out of ${this.maxScore}.`;
@@ -209,7 +209,6 @@ const RPSSLGame = {
   },
 
   displayExitMessage() {
-    console.clear();
     displayMessage('exitMessage');
   },
 
@@ -219,13 +218,13 @@ const RPSSLGame = {
   },
 
   displayRecentMoves() {
-    let humanRecentMoves = this.human.handHistory.slice(-7);
-    let computerRecentMoves = this.computer.handHistory.slice(-7);
+    let humanRecentMoves = this.human.handHistory.slice(-20);
+    let computerRecentMoves = this.computer.handHistory.slice(-20);
 
     if (humanRecentMoves.length > 0) {
-      console.log();
+      console.clear();
       console.log(`Player's move(s): ${humanRecentMoves.join(', ')}`);
-      console.log(`Computer's move(s): ${computerRecentMoves.join(', ')}`);
+      console.log(`Computer's move(s): ${computerRecentMoves.join(', ')}\n`);
     }
   },
 
@@ -273,7 +272,6 @@ const RPSSLGame = {
   },
 
   playAnotherGame() {
-    console.log();
     return validUserInput.fetchPlayAgain()[0] === 'y';
   },
 
@@ -304,17 +302,12 @@ const RPSSLGame = {
   },
 
   playRound(computerdifficulty) {
+    let humanHistory = this.human.handHistory;
     this.displayGameScore();
 
-    this.displayRecentMoves();
+    this.computer.chooseMove(computerdifficulty, humanHistory);
 
-    if (['h', 'hard'].includes(computerdifficulty)) {
-      this.computer.choose('hard', this.human.handHistory);
-    } else if (['e', 'easy'].includes(computerdifficulty)) {
-      this.computer.choose('easy');
-    }
-
-    this.human.choose();
+    this.human.chooseMove();
 
     this.displayRoundChoices();
 
@@ -328,7 +321,6 @@ const RPSSLGame = {
   },
 
   play() {
-    console.clear();
     this.displayWelcomeMessage();
     let difficulty = this.getDifficulty();
     while (true) {
@@ -346,6 +338,7 @@ const RPSSLGame = {
         }
       }
     }
+    this.displayRecentMoves();
     this.displayExitMessage();
   }
 };
