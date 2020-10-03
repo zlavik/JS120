@@ -222,7 +222,7 @@ const RPSSLGame = {
     console.log(' '.padStart((lineWidth - message.length) / 2) + message);
     console.log('='.repeat(lineWidth));
     console.log(' '.padStart((lineWidth - message2.length) / 2) + message2);
-    this.wait(2500);
+    this.wait(2000);
     console.clear();
   },
 
@@ -417,8 +417,4 @@ const RPSSLGame = {
 
 };
 
-RPSSLGame.start();.displayExitMessage();
-  }
-};
-
-RPSSLGame.play();
+RPSSLGame.start();
