@@ -50,6 +50,22 @@ const validUserInput = {
     return answer;
   },
 
+  fetchSelectMenu() {
+    let answer;
+    while (true) {
+      displayMessage('selectMenu');
+      answer = readline.question('=> ').toLowerCase();
+
+      if (['1', '2', '3', '4'].includes(answer)) {
+        console.clear();
+        break;
+      } else {
+        displayMessage('invalidChoice');
+      }
+    }
+    return answer;
+  },
+
   fetchPlayAgain() {
     let answer;
     while (true) {
@@ -206,6 +222,8 @@ const RPSSLGame = {
     console.log(' '.padStart((lineWidth - message.length) / 2) + message);
     console.log('='.repeat(lineWidth));
     console.log(' '.padStart((lineWidth - message2.length) / 2) + message2);
+    this.wait(2500);
+    console.clear();
   },
 
   displayExitMessage() {
@@ -320,8 +338,12 @@ const RPSSLGame = {
     return validUserInput.fetchDifficulty();
   },
 
+  wait(ms) {
+    let waitUntil = new Date().getTime() + ms;
+    while (new Date().getTime() < waitUntil);
+  },
+
   play() {
-    this.displayWelcomeMessage();
     let difficulty = this.getDifficulty();
     while (true) {
       this.playRound(difficulty);
@@ -339,8 +361,60 @@ const RPSSLGame = {
       }
     }
     this.displayRecentMoves();
+    this.exitGame();
+  },
+  displayMenu() {
+    let lineWidth = 55;
+    let menuMsg = MESSAGES['mainMenu'];
+    let playMsg = '1> Play';
+    let rulesMsg = '2> Rules';
+    let exitMsg = '3> Exit';
+
+    console.log('='.repeat(lineWidth));
+    console.log(' '.padStart((lineWidth - menuMsg.length) / 2) + menuMsg);
+    console.log('='.repeat(lineWidth));
+    console.log(' '.padStart((lineWidth - 2 - playMsg.length) / 2) + playMsg);
+    console.log(' '.padStart((lineWidth - rulesMsg.length) / 2) + rulesMsg);
+    console.log(' '.padStart((lineWidth - 2 - exitMsg.length) / 2) + exitMsg);
+    console.log('='.repeat(lineWidth));
+  },
+
+  displayRules() {
+    displayMessage('rules');
+    displayMessage('continue');
+    readline.question('=>');
+    console.clear();
+    this.mainMenu();
+  },
+
+  selectMenu(answer) {
+    switch (answer) {
+      case '1':
+        this.play();
+        break;
+      case '2':
+        this.displayRules();
+        break;
+      case '3':
+        this.exitGame();
+        break;
+    }
+  },
+
+  exitGame() {
     this.displayExitMessage();
+  },
+
+  mainMenu() {
+    this.displayMenu();
+    this.selectMenu(validUserInput.fetchSelectMenu());
+  },
+
+  start() {
+    this.displayWelcomeMessage();
+    this.mainMenu();
   }
+
 };
 
-RPSSLGame.play();
+RPSSLGame.start();
