@@ -417,4 +417,8 @@ const RPSSLGame = {
 
 };
 
-RPSSLGame.start();
+RPSSLGame.start();.displayExitMessage();
+  }
+};
+
+RPSSLGame.play();
