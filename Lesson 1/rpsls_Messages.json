@@ -10,7 +10,7 @@
   "playAgain" : "\nPlay again? (y/n)",
   "playerWonGame" : "Congratulations! You've won this game!",
   "computerWonGame" : "The computer has won this game.",
-  "chooseDifficulty" : "Please level difficulty level:\n   'e'/'easy' | 'h'/'hard'",
+  "chooseDifficulty" : "Please select difficulty level:\n   'e'/'easy' | 'h'/'hard'",
   "mainMenu" : "Main Menu",
   "selectMenu" :"Please choose (1, 2, 3)",
   "rules" : "Scissors cuts paper\nPaper covers rock\nRock crushes lizard\nLizard poisons Spock\nSpock smashes scissors\nScissors decapitates lizard\nLizard eats paper\nPaper disproves Spock\nSpock vaporizes rock,\nRock crushes scissors",
