@@ -184,7 +184,7 @@ const difficulty = {
 function createComputer() {
   let playerObject = createPlayer();
   let computerObject = {
-    difficulty: difficulty,
+    difficulty,
 
     chooseMove(difficultyType, playerMoves) {
       if (['easy', 'e'].includes(difficultyType)) {

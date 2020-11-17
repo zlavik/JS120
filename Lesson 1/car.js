@@ -1,34 +1,29 @@
+let carArgs = {
+  make: 'make',
+  model: 'model',
+  year: 'year',
+  color: 'color',
+  passengers: 'passengers',
+  convertible: 'convertible',
+  mileage: 'mileage'
+};
 
-function createCar(make, fuelLevel, engineOn) {
-  return {
-    Make : make,
-    fuelLvl: fuelLevel,
-    engineStatus: engineOn,
+let carFunctions = {
+  start() {
+    this.isOn = true;
+  },
+  stop() {
+    this.isOn = false;
+  },
+};
 
-    startEngine() {
-      this.engineStatus = true;
-    },
-
-    drive() {
-      this.fuelLvl -= 0.1;
-    },
-
-    stopEngine() {
-      this.engineStatus = false;
-    },
-
-    refuel(percent) {
-      if ((this.fuelLvl + (percent / 100)) <= 1) {
-        this.fuelLvl += (percent / 100);
-      } else {
-        this.fuelLvl = 1;
-      }
-    },
-  }
+function Car(args) {
+  Object.assign(this, args);
+  Object.setPrototypeOf(this, carFunctions);
 }
 
-let bmw = createCar('BMW', 0.5, false);
+let civic = new Car(carArgs);
 
-let ferrari = createCar('Ferrari', 0.7, true);
+let bmw = new Car(carArgs);
 
-let lada = createCar('Lada', 1, false);
+console.log(civic.hasOwnProperty('start'));
