@@ -161,8 +161,12 @@ class TTTGame {
     }
 
     this.displayMatchResults();
-    if (this.playAgain()) this.playMatch();
 
+    if (this.playAgain()) {
+      this.playMatch();
+    } else {
+      this.displayGoodbyeMessage();
+    }
   }
 
   playOneGame() {
@@ -269,11 +273,11 @@ class TTTGame {
 
   displayResults() {
     if (this.isWinner(this.human)) {
-      console.log("You won! Congratulations!");
+      this.prompt("playerWonRound");
     } else if (this.isWinner(this.computer)) {
-      console.log("I won! I won! Take that, human!");
+      this.prompt("computerWonRound");
     } else {
-      console.log("A tie game. How boring.");
+      this.prompt("tie");
     }
   }
 
